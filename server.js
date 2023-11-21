@@ -23,7 +23,7 @@ const startPythonServer = () => {
   pythonProcess.stderr.pipe(process.stderr);
 };
 
-startPythonServer();  // Start the Python server when the Node.js server starts
+// startPythonServer();  // Start the Python server when the Node.js server starts
 
 app.get('/', (req, res) => {
   res.send("Hey, it's the Node.js server speaking!");
