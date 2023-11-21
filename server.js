@@ -1,34 +1,29 @@
 const express = require('express');
-const { exec } = require('child_process');
-const path = require('path');
+const axios = require('axios');
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
-// Get the absolute path to the bash script
-const bashScriptPath = path.join(__dirname, '../python-start-script.sh');
+app.use(express.json());
 
-// Start the Python server by executing the bash script
-const startPythonServer = () => {
-  const pythonProcess = exec(`bash ${bashScriptPath}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error starting Python server: ${error.message}`);
-    } else {
-      console.log(`Python server started: ${stdout}`);
-    }
-  });
+app.post('/call-python-endpoint', async (req, res) => {
+  try {
+    // Extract the message from the request
+    const message = req.body.message;
 
-  // Forward Python server output to the Node.js server output
-  pythonProcess.stdout.pipe(process.stdout);
-  pythonProcess.stderr.pipe(process.stderr);
-};
+    // Call the Python server endpoint
+    const pythonResponse = await axios.post('http://python-server:5000/python-endpoint', { message });
 
-// startPythonServer();  // Start the Python server when the Node.js server starts
+    // Log the Python server's response
+    console.log('Python Server Response:', pythonResponse.data);
 
-app.get('/', (req, res) => {
-  res.send("Hey, it's the Node.js server speaking!");
+    res.json({ success: true, message: 'Request sent to Python server' });
+  } catch (error) {
+    console.error('Error calling Python server:', error.message);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
 });
 
 app.listen(port, () => {
-  console.log(`Node.js server listening at http://localhost:${port}`);
+  console.log(`Node.js Server running on http://localhost:${port}`);
 });
